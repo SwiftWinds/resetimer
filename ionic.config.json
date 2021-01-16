@@ -1,0 +1,8 @@
+{
+  "name": "resetimer",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react",
+  "id": "ec900677"
+}
