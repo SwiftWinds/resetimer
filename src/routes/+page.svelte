@@ -1,33 +1,54 @@
-<script>
-  import Greet from "$lib/Greet.svelte";
+<script lang="ts">
+  import { runningApps } from "$lib/stores/apps";
+
+  let breakMinutes = 5;
+  let workMinutes = 30;
+  let selectedApps: string[] = [];
+  let isWhitelist = false;
+
+  $: console.log(selectedApps);
+  $: console.log(breakMinutes);
 </script>
 
-<h1>Welcome to Tauri!</h1>
+<h1>Welcome to ReseTimer!</h1>
 
-<div class="row">
-  <a href="https://vitejs.dev" target="_blank">
-    <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-  </a>
-  <a href="https://tauri.app" target="_blank">
-    <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-  </a>
-  <a href="https://kit.svelte.dev" target="_blank">
-    <img src="/svelte.svg" class="logo svelte" alt="Svelte Logo" />
-  </a>
+<div>
+  <p>Break amount:</p>
+
+  <input
+    type="number"
+    id="break-input"
+    placeholder="Enter break in minutes..."
+    bind:value={breakMinutes}
+  />
+
+  <br />
+
+  <p>Work amount:</p>
+  <input
+    type="number"
+    id="break-input"
+    placeholder="Enter work in minutes..."
+    bind:value={workMinutes}
+  />
+  <br />
+  <br />
+  <input
+    type="checkbox"
+    id="list-mode"
+    name="list-mode"
+    bind:checked={isWhitelist}
+  />
+  <label for="list-mode">Whitelist</label>
+  <br />
+  <br />
+  <label for="apps">Applications to block:</label>
+  <select bind:value={selectedApps} name="apps" id="apps" multiple>
+    {#each $runningApps as app}
+      <option value={app}>{app}</option>
+    {/each}
+  </select>
+  <br />
+  <br />
+  <a href="/timer">Start</a>
 </div>
-
-<p>Click on the Tauri, Vite, and Svelte logos to learn more.</p>
-
-<div class="row">
-  <Greet />
-</div>
-
-<style>
-  .logo.vite:hover {
-    filter: drop-shadow(0 0 2em #747bff);
-  }
-
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00);
-  }
-</style>

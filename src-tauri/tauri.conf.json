@@ -14,8 +14,17 @@
     "allowlist": {
       "all": false,
       "shell": {
-        "all": false,
-        "open": true
+        "all": true,
+        "execute": true,
+        "sidecar": true,
+        "open": true,
+        "scope": [
+          {
+            "name": "run-osascript",
+            "cmd": "osascript",
+            "args": ["-e", { "validator": ".*" }]
+          }
+        ]
       }
     },
     "bundle": {
@@ -62,7 +71,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "resetimer",
+        "title": "Resetimer",
         "width": 800
       }
     ]
