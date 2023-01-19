@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import {
+    breakTimer,
+    workTimer,
     isWorking,
-    remainingBreakSeconds,
-    remainingWorkSeconds,
   } from "$lib/stores/timer";
 
   function padLeft(num: number, pad: string, length: number) {
@@ -10,16 +11,24 @@
   }
 
   $: remainingWorkSecondsFormatted = `${padLeft(
-    Math.floor($remainingWorkSeconds / 60),
+    Math.floor($workTimer / 60),
     "0",
     2
-  )}:${padLeft($remainingWorkSeconds % 60, "0", 2)}`;
+  )}:${padLeft($workTimer % 60, "0", 2)}`;
 
   $: remainingBreakSecondsFormatted = `${padLeft(
-    Math.floor($remainingBreakSeconds / 60),
+    Math.floor($breakTimer / 60),
     "0",
     2
-  )}:${padLeft($remainingBreakSeconds % 60, "0", 2)}`;
+  )}:${padLeft($breakTimer % 60, "0", 2)}`;
+
+  function stopTimer() {
+    console.log("Stopping timer");
+    breakTimer.stop();
+    workTimer.stop();
+
+    goto("/");
+  }
 </script>
 
 {#if $isWorking}
@@ -28,4 +37,6 @@
   <div>Remaining break time: {remainingBreakSecondsFormatted}</div>
 {/if}
 
-<a href="/">Stop</a>
+<div>
+  <button on:click={stopTimer}>Stop</button>
+</div>
