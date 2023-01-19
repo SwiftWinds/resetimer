@@ -24,8 +24,8 @@
 
   function stopTimer() {
     console.log("Stopping timer");
-    breakTimer.stop();
-    workTimer.stop();
+    breakTimer.cancel();
+    workTimer.cancel();
 
     goto("/");
   }

@@ -8,7 +8,7 @@ export function createBreakTimer() {
   let interval: NodeJS.Timer;
 
   function start(breakSeconds: number) {
-    set(breakSeconds);
+    set(breakSeconds + get(breakTimer));
     interval = setInterval(() => {
       if (get(isWorking)) {
         return;
@@ -24,10 +24,15 @@ export function createBreakTimer() {
     clearInterval(interval);
   }
 
+  function cancel() {
+    stop();
+    set(0);
+  }
+
   return {
     subscribe,
     start,
-    stop,
+    cancel,
     reset: () => {
       stop();
       start(originalSeconds);
@@ -62,10 +67,15 @@ export function createWorkTimer() {
     clearInterval(interval);
   }
 
+  function cancel() {
+    stop();
+    set(0);
+  }
+
   return {
     subscribe,
     start,
-    stop,
+    cancel,
     reset: () => {
       stop();
       start(originalSeconds);

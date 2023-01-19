@@ -25,6 +25,9 @@
             "args": ["-e", { "validator": ".*" }]
           }
         ]
+      },
+      "notification": {
+        "all": true
       }
     },
     "bundle": {

@@ -54,7 +54,7 @@
   <label for="list-mode">Whitelist</label>
   <br />
   <br />
-  <label for="apps">Applications to block:</label>
+  <label for="apps">Applications to {$isWhitelist ? 'allow' : 'block'}:</label>
   <select bind:value={$selectedApps} name="apps" id="apps" multiple>
     {#each $runningApps as app}
       <option value={app}>{app}</option>
