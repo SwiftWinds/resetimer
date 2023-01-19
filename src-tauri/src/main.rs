@@ -10,20 +10,9 @@ fn greet(name: &str) -> String {
 }
 
 use active_win_pos_rs::get_active_window;
-use appkit_nsworkspace_bindings::{INSArray, NSWorkspace_NSWorkspaceRunningApplications, INSRunningApplication, INSWorkspace, NSWorkspace};
 
 #[tauri::command]
 fn get_frontmost_window() -> String {
-    let active_window_pid = unsafe {
-        let workspace = NSWorkspace::sharedWorkspace();
-        let active_app = workspace.frontmostApplication();
-        let running_apps = workspace.runningApplications();
-        let running_apps_count = running_apps.count();
-        
-        active_app.processIdentifier() as i64
-    };
-
-    println!("Active window pid: {}", active_window_pid);
     match get_active_window() {
         Ok(active_window) => {
             format!("{{\"title\": \"{}\", \"process_name\": \"{}\", \"process_id\": \"{}\", \"window_id\": \"{}\"}}", active_window.title, active_window.process_name, active_window.process_id, active_window.window_id)
