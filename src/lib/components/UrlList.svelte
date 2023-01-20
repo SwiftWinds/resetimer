@@ -1,6 +1,6 @@
 <script lang="ts">
   import trashCanSvg from "$lib/assets/trash-can.svg";
-  import { isWhitelist } from "$lib/stores/apps";
+  import { isUsingUrlWhitelist } from "$lib/stores/apps";
 
   export let urls: string[] = [];
   let input: string;
@@ -14,33 +14,43 @@
   }
 
   function deleteUrl(event: MouseEvent) {
-    const target = event.target as HTMLImageElement;
-    const item = target.parentElement as HTMLDivElement;
-    const itemText = item.querySelector(".item-text") as HTMLSpanElement;
-    const url = itemText.textContent;
-
+    const target = event.target as HTMLElement;
+    const item = target.closest(".item") as HTMLElement;
+    const itemText = item.querySelector(".item-text") as HTMLElement;
+    const url = itemText.innerText;
     urls = urls.filter((u) => u !== url);
   }
 </script>
 
-<div>Websites to {$isWhitelist ? "allow" : "block"}:</div>
+<input
+  type="checkbox"
+  id="url-list-mode"
+  name="url-list-mode"
+  bind:checked={$isUsingUrlWhitelist}
+/>
+<label for="url-list-mode">Whitelist urls</label>
+
+<div>Websites to {$isUsingUrlWhitelist ? "allow" : "block"}:</div>
 
 <div id="list">
   {#each urls as url}
     <div class="item">
       <span class="item-text">{url}</span>
-      <img
-        on:click={deleteUrl}
-        src={trashCanSvg}
-        alt="delete url"
-        class="trash-can"
-      />
+      <button class="icon-wrapper" on:click={deleteUrl}>
+        <img src={trashCanSvg} alt="delete url" class="trash-can" />
+      </button>
     </div>
   {/each}
 </div>
 
 <form id="input-container" on:submit|preventDefault={addUrl}>
-  <input bind:value={input} type="text" id="input-field" />
+  <input
+    bind:value={input}
+    type="text"
+    id="input-field"
+    autocorrect="off"
+    autocapitalize="off"
+  />
   <button id="add-button">Add</button>
 </form>
 
@@ -84,8 +94,15 @@
     margin-right: auto;
   }
 
+  .icon-wrapper {
+    display: grid;
+    place-items: center;
+  }
+
   .trash-can {
-    width: 20px;
-    height: 20px;
+    filter: invert(37%) sepia(38%) saturate(3211%) hue-rotate(345deg)
+      brightness(95%) contrast(95%);
+    width: 24px;
+    height: 24px;
   }
 </style>

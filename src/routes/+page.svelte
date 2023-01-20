@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { runningApps, isWhitelist, selectedApps } from "$lib/stores/apps";
+  import { runningApps, isUsingAppWhitelist, selectedApps } from "$lib/stores/apps";
   import {
     breakMinutes,
     breakTimer,
@@ -13,7 +13,7 @@
     console.log("Starting timer");
     console.log("Break minutes: " + $breakMinutes);
     console.log("Work minutes: " + $workMinutes);
-    console.log("Is whitelist: " + $isWhitelist);
+    console.log("Is whitelist: " + $isUsingAppWhitelist);
     console.log("Selected apps: " + $selectedApps);
 
     breakTimer.start($breakMinutes * 60);
@@ -50,14 +50,14 @@
   <br />
   <input
     type="checkbox"
-    id="list-mode"
-    name="list-mode"
-    bind:checked={$isWhitelist}
+    id="app-list-mode"
+    name="app-list-mode"
+    bind:checked={$isUsingAppWhitelist}
   />
-  <label for="list-mode">Whitelist</label>
+  <label for="app-list-mode">Whitelist apps</label>
   <br />
   <br />
-  <label for="apps">Applications to {$isWhitelist ? "allow" : "block"}:</label>
+  <label for="apps">Apps to {$isUsingAppWhitelist ? "allow" : "block"}:</label>
   <select bind:value={$selectedApps} name="apps" id="apps" multiple>
     {#each $runningApps as app}
       <option value={app}>{app}</option>

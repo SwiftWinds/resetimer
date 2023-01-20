@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/tauri";
-import { derived, get, readable, writable } from "svelte/store";
+import { derived, readable, writable } from "svelte/store";
 
 import { runCommand } from "$lib/utils/run-command";
 import pMemoize from "p-memoize";
@@ -132,4 +132,5 @@ export const currentUrl = derived(activeApp, ($activeApp, set) => {
 
 export const selectedApps = writable<string[]>([]);
 export const selectedUrls = writable<string[]>([]);
-export const isWhitelist = writable(false);
+export const isUsingAppWhitelist = writable(false);
+export const isUsingUrlWhitelist = writable(false);

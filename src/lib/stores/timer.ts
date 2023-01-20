@@ -2,7 +2,8 @@ import { derived, get, writable } from "svelte/store";
 import {
   activeProcessName,
   currentUrl,
-  isWhitelist,
+  isUsingAppWhitelist,
+  isUsingUrlWhitelist,
   selectedApps,
   selectedUrls,
 } from "./apps";
@@ -14,6 +15,7 @@ import {
 import breakOverAudio from "$lib/assets/break-over.mp3";
 import formatSeconds from "$lib/utils/time";
 import { persisted } from "svelte-local-storage-store";
+import { cleanUrl } from "$lib/utils/url";
 
 export function createBreakTimer() {
   const { subscribe, set, update } = writable(0);
@@ -146,19 +148,44 @@ export function createWorkTimer() {
 export const workTimer = createWorkTimer();
 
 export const isWorking = derived(
-  [activeProcessName, currentUrl, isWhitelist, selectedApps, selectedUrls],
+  [
+    activeProcessName,
+    currentUrl,
+    isUsingAppWhitelist,
+    selectedApps,
+    isUsingUrlWhitelist,
+    selectedUrls,
+  ],
   ([
     $activeProcessName,
     $currentUrl,
-    $isWhitelist,
+    $isUsingAppWhitelist,
     $selectedApps,
+    $isUsingUrlWhitelist,
     $selectedUrls,
   ]) => {
     const isUsingSelectedApp = $selectedApps.includes($activeProcessName);
-    const isUsingSelectedUrl = $selectedUrls.includes($currentUrl as string);
-    return $isWhitelist
-      ? isUsingSelectedApp || isUsingSelectedUrl
-      : !isUsingSelectedApp && !isUsingSelectedUrl;
+    const isUsingSelectedUrl = $selectedUrls.some(
+      (url) =>
+        (typeof $currentUrl === "string" || $currentUrl instanceof String) &&
+        cleanUrl($currentUrl as string).startsWith(cleanUrl(url))
+    );
+
+    if ($isUsingAppWhitelist && $isUsingUrlWhitelist) {
+      return isUsingSelectedApp && isUsingSelectedUrl;
+    }
+
+    if ($isUsingAppWhitelist && !$isUsingUrlWhitelist) {
+      return isUsingSelectedApp && !isUsingSelectedUrl;
+    }
+
+    if (!$isUsingAppWhitelist && $isUsingUrlWhitelist) {
+      return !isUsingSelectedApp && isUsingSelectedUrl;
+    }
+
+    if (!$isUsingAppWhitelist && !$isUsingUrlWhitelist) {
+      return !isUsingSelectedApp && !isUsingSelectedUrl;
+    }
   }
 );
 
