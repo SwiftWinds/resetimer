@@ -127,10 +127,7 @@ export const currentUrl = derived(activeApp, ($activeApp, set) => {
   getPathFromPid($activeApp?.process_id)
     .then(getBundleIdFromPath)
     .then(getUrlFromBundleId)
-    .then((url) => {
-      console.log("setting to url", url);
-      set(url);
-    });
+    .then(set);
 });
 
 export const selectedApps = writable<string[]>([]);
