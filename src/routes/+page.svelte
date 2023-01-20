@@ -1,7 +1,12 @@
 <script lang="ts">
   import { runningApps, isWhitelist, selectedApps } from "$lib/stores/apps";
-  import { breakMinutes, breakTimer, workMinutes, workTimer } from "$lib/stores/timer";
-  import { goto } from '$app/navigation';
+  import {
+    breakMinutes,
+    breakTimer,
+    workMinutes,
+    workTimer,
+  } from "$lib/stores/timer";
+  import { goto } from "$app/navigation";
 
   function startTimer() {
     console.log("Starting timer");
@@ -15,7 +20,7 @@
 
     console.log("Timer started");
 
-    goto('/timer');
+    goto("/timer");
   }
 </script>
 
@@ -51,7 +56,7 @@
   <label for="list-mode">Whitelist</label>
   <br />
   <br />
-  <label for="apps">Applications to {$isWhitelist ? 'allow' : 'block'}:</label>
+  <label for="apps">Applications to {$isWhitelist ? "allow" : "block"}:</label>
   <select bind:value={$selectedApps} name="apps" id="apps" multiple>
     {#each $runningApps as app}
       <option value={app}>{app}</option>

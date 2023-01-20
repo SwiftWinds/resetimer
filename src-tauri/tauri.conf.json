@@ -23,6 +23,21 @@
             "name": "run-osascript",
             "cmd": "osascript",
             "args": ["-e", { "validator": ".*" }]
+          },
+          {
+            "name": "run-which",
+            "cmd": "which",
+            "args": [{ "validator": ".*" }]
+          },
+          {
+            "name": "run-ps",
+            "cmd": "ps",
+            "args": true
+          },
+          {
+            "name": "mdls-get-bundleid",
+            "cmd": "mdls",
+            "args": ["-name", "kMDItemCFBundleIdentifier", "-r", { "validator": ".*" }]
           }
         ]
       },
@@ -45,7 +60,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "tech.resetimer.app",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
