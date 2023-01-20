@@ -1,20 +1,17 @@
 <script lang="ts">
   import { runningApps, isWhitelist, selectedApps } from "$lib/stores/apps";
-  import { breakTimer, workTimer } from "$lib/stores/timer";
+  import { breakMinutes, breakTimer, workMinutes, workTimer } from "$lib/stores/timer";
   import { goto } from '$app/navigation';
-
-  let breakMinutes = 5;
-  let workMinutes = 30;
 
   function startTimer() {
     console.log("Starting timer");
-    console.log("Break minutes: " + breakMinutes);
-    console.log("Work minutes: " + workMinutes);
+    console.log("Break minutes: " + $breakMinutes);
+    console.log("Work minutes: " + $workMinutes);
     console.log("Is whitelist: " + $isWhitelist);
     console.log("Selected apps: " + $selectedApps);
 
-    breakTimer.start(breakMinutes * 60);
-    workTimer.start(workMinutes * 60);
+    breakTimer.start($breakMinutes * 60);
+    workTimer.start($workMinutes * 60);
 
     console.log("Timer started");
 
@@ -25,23 +22,23 @@
 <h1>Welcome to ReseTimer!</h1>
 
 <div>
-  <p>Break amount:</p>
+  <p># break minutes:</p>
 
   <input
     type="number"
     id="break-input"
     placeholder="Enter break in minutes..."
-    bind:value={breakMinutes}
+    bind:value={$breakMinutes}
   />
 
   <br />
 
-  <p>Work amount:</p>
+  <p># work minutes:</p>
   <input
     type="number"
     id="break-input"
     placeholder="Enter work in minutes..."
-    bind:value={workMinutes}
+    bind:value={$workMinutes}
   />
   <br />
   <br />

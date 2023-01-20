@@ -1,13 +1,43 @@
 import { derived, get, writable } from "svelte/store";
 import { activeApp, isWhitelist, selectedApps } from "./apps";
+import {
+  isPermissionGranted,
+  requestPermission,
+  sendNotification,
+} from "@tauri-apps/api/notification";
+import breakOverAudio from "$lib/assets/break-over.mp3";
+import formatSeconds from "$lib/utils/time";
 
 export function createBreakTimer() {
   const { subscribe, set, update } = writable(0);
 
   let originalSeconds: number;
   let interval: NodeJS.Timer;
+  let hasReset = false;
+
+  async function sendBreakOverNotification() {
+    let permissionGranted = await isPermissionGranted();
+    if (!isPermissionGranted()) {
+      const permission = await requestPermission();
+      permissionGranted = permission === "granted";
+      requestPermission();
+    }
+    
+    if (permissionGranted) {
+      sendNotification({
+        title: "Break over! 😢",
+        body: "Aww... Boohoo! Time to get back to work! 😭",
+        icon: "https://cdn-icons-png.flaticon.com/512/60/60802.png",
+      });
+      new Audio(breakOverAudio).play();
+    }
+  }
 
   function start(breakSeconds: number) {
+    if (!hasReset) {
+      originalSeconds = breakSeconds;
+      hasReset = true;
+    } 
     set(breakSeconds + get(breakTimer));
     interval = setInterval(() => {
       if (get(isWorking)) {
@@ -15,7 +45,11 @@ export function createBreakTimer() {
       }
       update((n) => {
         console.log("break timer", n);
-        return n <= 0 ? n : n - 1;
+        if (n <= 0) {
+          sendBreakOverNotification();
+          return n;
+        }
+        return n - 1;
       });
     }, 1000);
   }
@@ -27,6 +61,7 @@ export function createBreakTimer() {
   function cancel() {
     stop();
     set(0);
+    hasReset = false;
   }
 
   return {
@@ -47,6 +82,22 @@ export function createWorkTimer() {
   let originalSeconds: number;
   let interval: NodeJS.Timer;
 
+  async function sendResetNotification() {
+    let permissionGranted = await isPermissionGranted();
+    if (!isPermissionGranted()) {
+      const permission = await requestPermission();
+      permissionGranted = permission === "granted";
+      requestPermission();
+    }
+    
+    if (permissionGranted) {
+      sendNotification({
+        title: `Break tank refilled! 😌`,
+        body: `You now have up to ${formatSeconds(get(breakTimer))} minutes of break time! 🤩`,
+      });
+    }
+  }
+
   function start(workSeconds: number) {
     originalSeconds = workSeconds;
     set(workSeconds);
@@ -56,6 +107,7 @@ export function createWorkTimer() {
         if (n <= 0) {
           breakTimer.reset();
           workTimer.reset();
+          sendResetNotification();
           return originalSeconds;
         }
         return n - 1;
@@ -91,3 +143,6 @@ export const isWorking = derived(
     return $isWhitelist ? isUsingSelectedApp : !isUsingSelectedApp;
   }
 );
+
+export const breakMinutes = writable(5);
+export const workMinutes = writable(30);

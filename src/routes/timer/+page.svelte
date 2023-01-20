@@ -1,26 +1,11 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import {
-    breakTimer,
-    workTimer,
-    isWorking,
-  } from "$lib/stores/timer";
+  import { breakTimer, workTimer, isWorking } from "$lib/stores/timer";
+  import formatSeconds from "$lib/utils/time";
 
-  function padLeft(num: number, pad: string, length: number) {
-    return (new Array(length + 1).join(pad) + num).slice(-length);
-  }
+  $: remainingWorkSecondsFormatted = formatSeconds($workTimer);
 
-  $: remainingWorkSecondsFormatted = `${padLeft(
-    Math.floor($workTimer / 60),
-    "0",
-    2
-  )}:${padLeft($workTimer % 60, "0", 2)}`;
-
-  $: remainingBreakSecondsFormatted = `${padLeft(
-    Math.floor($breakTimer / 60),
-    "0",
-    2
-  )}:${padLeft($breakTimer % 60, "0", 2)}`;
+  $: remainingBreakSecondsFormatted = formatSeconds($breakTimer);
 
   function stopTimer() {
     console.log("Stopping timer");
