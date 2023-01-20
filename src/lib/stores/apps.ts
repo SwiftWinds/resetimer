@@ -1,7 +1,9 @@
 import { invoke } from "@tauri-apps/api/tauri";
-import { derived, readable, writable } from "svelte/store";
+import { derived, get, readable, writable } from "svelte/store";
 
 import { runCommand } from "$lib/utils/run-command";
+import pMemoize from "p-memoize";
+import ExpiryMap from "expiry-map";
 
 export const runningApps = readable<string[]>(["Loading..."], (set) => {
   const interval = setInterval(async () => {
@@ -24,58 +26,62 @@ interface ActiveWindow {
   process_id: string;
 }
 
-export const activeWindow = readable<ActiveWindow | null>(null, (set) => {
+export const activeApp = readable<ActiveWindow | null>(null, (set) => {
   const interval = setInterval(async () => {
     const activeWindow = (await invoke("get_frontmost_window")) as string;
     set(JSON.parse(activeWindow));
-    frontmostWindow.set(JSON.parse(activeWindow));
   }, 100);
 
   return () => {
     clearInterval(interval);
   };
 });
-export const activeApp = derived(
-  activeWindow,
-  ($activeWindow) => $activeWindow?.process_name ?? ""
+export const activeProcessName = derived(
+  activeApp,
+  ($activeApp) => $activeApp?.process_name ?? ""
 );
 
-export const currentUrl = derived(activeWindow, async ($activeWindow) => {
-  async function getPathFromPid(pid: string | undefined) {
-    if (!pid) {
-      return null;
-    }
-    console.log("pid", pid);
-    const { stdout } = await runCommand("run-ps", ["-o", "comm=", "-p", pid]);
-    console.log("stdout", stdout);
-    // truncate stdout after the last instance of ".app"
-    const lastIndexOfApp = stdout.lastIndexOf(".app");
-    if (lastIndexOfApp === -1) {
-      return null;
-    }
-    return stdout.slice(0, lastIndexOfApp + ".app".length);
+const getPathFromPid = pMemoize(async (pid: string | undefined) => {
+  console.log("getPathFromPid called with pid", pid);
+  if (!pid) {
+    return null;
   }
-
-  async function getBundleIdFromPath(path: string | null) {
-    if (!path) {
-      return null;
-    }
-    const { stdout } = await runCommand("mdls-get-bundleid", [
-      "-name",
-      "kMDItemCFBundleIdentifier",
-      "-r",
-      path,
-    ]);
-    console.log("bundle id", stdout.trim());
-
-    return stdout.trim();
+  console.log("pid", pid);
+  const { stdout } = await runCommand("run-ps", ["-o", "comm=", "-p", pid]);
+  console.log("stdout", stdout);
+  // truncate stdout after the last instance of ".app"
+  const lastIndexOfApp = stdout.lastIndexOf(".app");
+  if (lastIndexOfApp === -1) {
+    return null;
   }
+  return stdout.slice(0, lastIndexOfApp + ".app".length);
+});
 
-  async function getUrlFromBundleId(bundleId: string | null) {
+const getBundleIdFromPath = pMemoize(async (path: string | null) => {
+  console.log("getBundleIdFromPath called with path", path);
+  if (!path) {
+    return null;
+  }
+  const { stdout } = await runCommand("mdls-get-bundleid", [
+    "-name",
+    "kMDItemCFBundleIdentifier",
+    "-r",
+    path,
+  ]);
+  console.log("bundle id", stdout.trim());
+
+  return stdout.trim();
+});
+
+const cache = new ExpiryMap(1000);
+
+const getUrlFromBundleId = pMemoize(
+  async (bundleId: string | null) => {
+    console.log("getUrlFromBundleId called with bundleId", bundleId);
     if (!bundleId) {
       return null;
     }
-    let applescript;
+    let appleScript;
     if (
       [
         "com.google.Chrome",
@@ -99,32 +105,34 @@ export const currentUrl = derived(activeWindow, async ($activeWindow) => {
         "com.vivaldi.Vivaldi",
       ].includes(bundleId)
     ) {
-      applescript = `tell app id "${bundleId}" to get the URL of active tab of front window`;
+      appleScript = `tell app id "${bundleId}" to get the URL of active tab of front window`;
     } else if (
       ["com.apple.Safari", "com.apple.SafariTechnologyPreview"].includes(
         bundleId
       )
     ) {
-      applescript = `tell app id "${bundleId}" to get URL of front document`;
+      appleScript = `tell app id "${bundleId}" to get URL of front document`;
     } else {
       return null;
     }
 
-    const { stdout } = await runCommand("run-osascript", ["-e", applescript]);
+    const { stdout } = await runCommand("run-osascript", ["-e", appleScript]);
 
     return stdout.trim();
-  }
+  },
+  { cache }
+);
 
-  const url = await getUrlFromBundleId(
-    await getBundleIdFromPath(await getPathFromPid($activeWindow?.process_id))
-  );
-
-  console.log("url", url);
-
-  return url;
+export const currentUrl = derived(activeApp, ($activeApp, set) => {
+  getPathFromPid($activeApp?.process_id)
+    .then(getBundleIdFromPath)
+    .then(getUrlFromBundleId)
+    .then((url) => {
+      console.log("setting to url", url);
+      set(url);
+    });
 });
 
 export const selectedApps = writable<string[]>([]);
+export const selectedUrls = writable<string[]>([]);
 export const isWhitelist = writable(false);
-
-export const frontmostWindow = writable();

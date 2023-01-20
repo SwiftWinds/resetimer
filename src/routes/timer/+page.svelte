@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { currentUrl, frontmostWindow } from "$lib/stores/apps";
+  import { activeApp, currentUrl } from "$lib/stores/apps";
   import { breakTimer, workTimer, isWorking } from "$lib/stores/timer";
   import formatSeconds from "$lib/utils/time";
 
@@ -23,12 +23,7 @@
   <div>Remaining break time: {remainingBreakSecondsFormatted}</div>
 {/if}
 
-<div>{JSON.stringify($frontmostWindow)}</div>
-{#await }
-  
-{:then } 
-  
-{/await}
+<div>{JSON.stringify($activeApp)}</div>
 <div>{$currentUrl}</div>
 
 <div>

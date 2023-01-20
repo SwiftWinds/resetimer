@@ -1,5 +1,11 @@
 import { derived, get, writable } from "svelte/store";
-import { activeApp, isWhitelist, selectedApps } from "./apps";
+import {
+  activeProcessName,
+  currentUrl,
+  isWhitelist,
+  selectedApps,
+  selectedUrls,
+} from "./apps";
 import {
   isPermissionGranted,
   requestPermission,
@@ -7,7 +13,7 @@ import {
 } from "@tauri-apps/api/notification";
 import breakOverAudio from "$lib/assets/break-over.mp3";
 import formatSeconds from "$lib/utils/time";
-import { persisted } from 'svelte-local-storage-store';
+import { persisted } from "svelte-local-storage-store";
 
 export function createBreakTimer() {
   const { subscribe, set, update } = writable(0);
@@ -23,7 +29,7 @@ export function createBreakTimer() {
       permissionGranted = permission === "granted";
       requestPermission();
     }
-    
+
     if (permissionGranted) {
       sendNotification({
         title: "Break over! 😢",
@@ -38,7 +44,7 @@ export function createBreakTimer() {
     if (!hasReset) {
       originalSeconds = breakSeconds;
       hasReset = true;
-    } 
+    }
     set(breakSeconds + get(breakTimer));
     interval = setInterval(() => {
       if (get(isWorking)) {
@@ -90,11 +96,13 @@ export function createWorkTimer() {
       permissionGranted = permission === "granted";
       requestPermission();
     }
-    
+
     if (permissionGranted) {
       sendNotification({
         title: `Break tank refilled! 😌`,
-        body: `You now have up to ${formatSeconds(get(breakTimer))} minutes of break time! 🤩`,
+        body: `You now have up to ${formatSeconds(
+          get(breakTimer)
+        )} minutes of break time! 🤩`,
       });
     }
   }
@@ -138,12 +146,21 @@ export function createWorkTimer() {
 export const workTimer = createWorkTimer();
 
 export const isWorking = derived(
-  [activeApp, isWhitelist, selectedApps],
-  ([$activeApp, $isWhitelist, $selectedApps]) => {
-    const isUsingSelectedApp = $selectedApps.includes($activeApp);
-    return $isWhitelist ? isUsingSelectedApp : !isUsingSelectedApp;
+  [activeProcessName, currentUrl, isWhitelist, selectedApps, selectedUrls],
+  ([
+    $activeProcessName,
+    $currentUrl,
+    $isWhitelist,
+    $selectedApps,
+    $selectedUrls,
+  ]) => {
+    const isUsingSelectedApp = $selectedApps.includes($activeProcessName);
+    const isUsingSelectedUrl = $selectedUrls.includes($currentUrl as string);
+    return $isWhitelist
+      ? isUsingSelectedApp || isUsingSelectedUrl
+      : !isUsingSelectedApp && !isUsingSelectedUrl;
   }
 );
 
-export const breakMinutes = persisted('breakMinutes', 5);
-export const workMinutes = persisted('workMinutes', 30);
+export const breakMinutes = persisted("breakMinutes", 5);
+export const workMinutes = persisted("workMinutes", 30);

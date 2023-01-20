@@ -7,6 +7,7 @@
     workTimer,
   } from "$lib/stores/timer";
   import { goto } from "$app/navigation";
+  import UrlList from "$lib/components/UrlList.svelte";
 
   function startTimer() {
     console.log("Starting timer");
@@ -64,5 +65,6 @@
   </select>
   <br />
   <br />
+  <UrlList />
   <button on:click={startTimer}>Start</button>
 </div>

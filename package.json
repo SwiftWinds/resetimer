@@ -13,12 +13,15 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.2.0",
+    "expiry-map": "^2.0.0",
+    "p-memoize": "^7.1.1",
     "svelte-local-storage-store": "^0.4.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "next",
     "@sveltejs/kit": "next",
     "@tauri-apps/cli": "^1.2.2",
+    "@types/lodash": "^4.14.191",
     "svelte": "^3.54.0",
     "svelte-check": "^3.0.0",
     "tslib": "^2.4.1",
