@@ -7,6 +7,7 @@ import {
 } from "@tauri-apps/api/notification";
 import breakOverAudio from "$lib/assets/break-over.mp3";
 import formatSeconds from "$lib/utils/time";
+import { persisted } from 'svelte-local-storage-store';
 
 export function createBreakTimer() {
   const { subscribe, set, update } = writable(0);
@@ -144,5 +145,5 @@ export const isWorking = derived(
   }
 );
 
-export const breakMinutes = writable(5);
-export const workMinutes = writable(30);
+export const breakMinutes = persisted('breakMinutes', 5);
+export const workMinutes = persisted('workMinutes', 30);
