@@ -4,12 +4,7 @@
   import { breakTimer, workTimer, isWorking } from "$lib/stores/timer";
   import formatSeconds from "$lib/utils/time";
 
-  $: remainingWorkSecondsFormatted = formatSeconds($workTimer);
-
-  $: remainingBreakSecondsFormatted = formatSeconds($breakTimer);
-
   function stopTimer() {
-    console.log("Stopping timer");
     breakTimer.cancel();
     workTimer.cancel();
 
@@ -18,9 +13,9 @@
 </script>
 
 {#if $isWorking || $breakTimer <= 0}
-  <div>Remaining time until reset: {remainingWorkSecondsFormatted}</div>
+  <div>Remaining time until reset: {formatSeconds($workTimer)}</div>
 {:else}
-  <div>Remaining break time: {remainingBreakSecondsFormatted}</div>
+  <div>Remaining break time: {formatSeconds($breakTimer)}</div>
 {/if}
 
 <div>{JSON.stringify($activeApp)}</div>

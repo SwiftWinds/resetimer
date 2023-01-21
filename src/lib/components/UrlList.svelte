@@ -1,24 +1,18 @@
 <script lang="ts">
   import trashCanSvg from "$lib/assets/trash-can.svg";
-  import { isUsingUrlWhitelist } from "$lib/stores/apps";
+  import { isUsingUrlWhitelist, selectedUrls } from "$lib/stores/apps";
 
-  export let urls: string[] = [];
   let input: string;
 
   function addUrl() {
-    console.log("addUrl", input);
     if (input) {
-      urls = [...urls, input];
+      $selectedUrls = [...$selectedUrls, input];
       input = "";
     }
   }
 
-  function deleteUrl(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    const item = target.closest(".item") as HTMLElement;
-    const itemText = item.querySelector(".item-text") as HTMLElement;
-    const url = itemText.innerText;
-    urls = urls.filter((u) => u !== url);
+  function deleteUrl(index: number) {
+    $selectedUrls = $selectedUrls.filter((_, i) => i !== index);
   }
 </script>
 
@@ -33,10 +27,10 @@
 <div>Websites to {$isUsingUrlWhitelist ? "allow" : "block"}:</div>
 
 <div id="list">
-  {#each urls as url}
+  {#each $selectedUrls as url, i}
     <div class="item">
       <span class="item-text">{url}</span>
-      <button class="icon-wrapper" on:click={deleteUrl}>
+      <button class="icon-wrapper" on:click={() => deleteUrl(i)}>
         <img src={trashCanSvg} alt="delete url" class="trash-can" />
       </button>
     </div>

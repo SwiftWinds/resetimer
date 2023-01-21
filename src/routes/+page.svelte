@@ -10,16 +10,9 @@
   import UrlList from "$lib/components/UrlList.svelte";
 
   function startTimer() {
-    console.log("Starting timer");
-    console.log("Break minutes: " + $breakMinutes);
-    console.log("Work minutes: " + $workMinutes);
-    console.log("Is whitelist: " + $isUsingAppWhitelist);
-    console.log("Selected apps: " + $selectedApps);
 
     breakTimer.start($breakMinutes * 60);
     workTimer.start($workMinutes * 60);
-
-    console.log("Timer started");
 
     goto("/timer");
   }

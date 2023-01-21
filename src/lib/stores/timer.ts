@@ -53,7 +53,6 @@ export function createBreakTimer() {
         return;
       }
       update((n) => {
-        console.log("break timer", n);
         if (n <= 0) {
           sendBreakOverNotification();
           return n;
@@ -114,7 +113,6 @@ export function createWorkTimer() {
     set(workSeconds);
     interval = setInterval(() => {
       update((n) => {
-        console.log("work timer", n);
         if (n <= 0) {
           breakTimer.reset();
           workTimer.reset();
@@ -165,11 +163,12 @@ export const isWorking = derived(
     $selectedUrls,
   ]) => {
     const isUsingSelectedApp = $selectedApps.includes($activeProcessName);
-    const isUsingSelectedUrl = $selectedUrls.some(
-      (url) =>
+    const isUsingSelectedUrl = $selectedUrls.some((url) => {
+      return (
         (typeof $currentUrl === "string" || $currentUrl instanceof String) &&
         cleanUrl($currentUrl as string).startsWith(cleanUrl(url))
-    );
+      );
+    });
 
     if ($isUsingAppWhitelist && $isUsingUrlWhitelist) {
       return isUsingSelectedApp && isUsingSelectedUrl;

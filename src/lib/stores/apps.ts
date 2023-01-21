@@ -4,6 +4,7 @@ import { derived, readable, writable } from "svelte/store";
 import { runCommand } from "$lib/utils/run-command";
 import pMemoize from "p-memoize";
 import ExpiryMap from "expiry-map";
+import { persisted } from "svelte-local-storage-store";
 
 export const runningApps = readable<string[]>(["Loading..."], (set) => {
   const interval = setInterval(async () => {
@@ -42,13 +43,10 @@ export const activeProcessName = derived(
 );
 
 const getPathFromPid = pMemoize(async (pid: string | undefined) => {
-  console.log("getPathFromPid called with pid", pid);
   if (!pid) {
     return null;
   }
-  console.log("pid", pid);
   const { stdout } = await runCommand("run-ps", ["-o", "comm=", "-p", pid]);
-  console.log("stdout", stdout);
   // truncate stdout after the last instance of ".app"
   const lastIndexOfApp = stdout.lastIndexOf(".app");
   if (lastIndexOfApp === -1) {
@@ -58,7 +56,6 @@ const getPathFromPid = pMemoize(async (pid: string | undefined) => {
 });
 
 const getBundleIdFromPath = pMemoize(async (path: string | null) => {
-  console.log("getBundleIdFromPath called with path", path);
   if (!path) {
     return null;
   }
@@ -68,7 +65,6 @@ const getBundleIdFromPath = pMemoize(async (path: string | null) => {
     "-r",
     path,
   ]);
-  console.log("bundle id", stdout.trim());
 
   return stdout.trim();
 });
@@ -77,7 +73,6 @@ const cache = new ExpiryMap(1000);
 
 const getUrlFromBundleId = pMemoize(
   async (bundleId: string | null) => {
-    console.log("getUrlFromBundleId called with bundleId", bundleId);
     if (!bundleId) {
       return null;
     }
@@ -130,7 +125,7 @@ export const currentUrl = derived(activeApp, ($activeApp, set) => {
     .then(set);
 });
 
-export const selectedApps = writable<string[]>([]);
-export const selectedUrls = writable<string[]>([]);
-export const isUsingAppWhitelist = writable(false);
-export const isUsingUrlWhitelist = writable(false);
+export const selectedApps = persisted("selectedApps", [] as string[]);
+export const selectedUrls = persisted("selectedUrls", [] as string[]);
+export const isUsingAppWhitelist = persisted("isUsingAppWhitelist", true);
+export const isUsingUrlWhitelist = persisted("isUsingUrlWhitelist", true);
