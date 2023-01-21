@@ -13,7 +13,7 @@ import {
   sendNotification,
 } from "@tauri-apps/api/notification";
 import breakOverAudio from "$lib/assets/break-over.mp3";
-import formatSeconds from "$lib/utils/time";
+import { formatTime } from "$lib/utils/time";
 import { persisted } from "svelte-local-storage-store";
 import { cleanUrl } from "$lib/utils/url";
 
@@ -48,18 +48,30 @@ export function createBreakTimer() {
       hasReset = true;
     }
     set(breakSeconds + get(breakTimer));
+    let lastBreakNotification: number;
+    let lastTick = Date.now();
     interval = setInterval(() => {
+      // console.log("tick", dt, get(isWorking));
       if (get(isWorking)) {
         return;
       }
       update((n) => {
         if (n <= 0) {
-          sendBreakOverNotification();
-          return n;
+          if (
+            !lastBreakNotification ||
+            Date.now() - lastBreakNotification > 1000
+          ) {
+            lastBreakNotification = Date.now();
+            sendBreakOverNotification();
+          }
+          return 0;
         }
-        return n - 1;
+        const tick = Date.now();
+        const dt = (tick - lastTick) / 1000;
+        lastTick = tick;
+        return n - dt;
       });
-    }, 1000);
+    }, 10);
   }
 
   function stop() {
@@ -101,7 +113,7 @@ export function createWorkTimer() {
     if (permissionGranted) {
       sendNotification({
         title: `Break tank refilled! 😌`,
-        body: `You now have up to ${formatSeconds(
+        body: `You now have up to ${formatTime(
           get(breakTimer)
         )} minutes of break time! 🤩`,
       });
@@ -111,6 +123,7 @@ export function createWorkTimer() {
   function start(workSeconds: number) {
     originalSeconds = workSeconds;
     set(workSeconds);
+    let lastTick = Date.now();
     interval = setInterval(() => {
       update((n) => {
         if (n <= 0) {
@@ -119,9 +132,12 @@ export function createWorkTimer() {
           sendResetNotification();
           return originalSeconds;
         }
-        return n - 1;
+        const tick = Date.now();
+        const dt = (tick - lastTick) / 1000;
+        lastTick = tick;
+        return n - dt;
       });
-    }, 1000);
+    }, 10);
   }
 
   function stop() {
