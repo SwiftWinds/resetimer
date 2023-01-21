@@ -101,6 +101,7 @@ export function createWorkTimer() {
 
   let originalSeconds: number;
   let interval: NodeJS.Timer;
+  let hasReset = false;
 
   async function sendResetNotification() {
     let permissionGranted = await isPermissionGranted();
@@ -121,7 +122,27 @@ export function createWorkTimer() {
   }
 
   function start(workSeconds: number) {
-    originalSeconds = workSeconds;
+    if (!hasReset) {
+      originalSeconds = workSeconds;
+      const now = new Date();
+      const currentHour = new Date();
+      currentHour.setMinutes(0, 0, 0); // also resets seconds and milliseconds
+      let currentStep = new Date(currentHour.getTime());
+      let nextStep = new Date(currentHour.getTime() + workSeconds * 1000);
+      while (nextStep <= now) {
+        currentStep = nextStep;
+        nextStep = new Date(currentStep.getTime() + workSeconds * 1000);
+      }
+      const start = [nextStep, currentStep].sort(function (a, b) {
+        // @ts-ignore
+        var distanceA = Math.abs(now - a);
+        // @ts-ignore
+        var distanceB = Math.abs(now - b);
+        return distanceA - distanceB; // sort a before b when the distance is smaller
+      })[0];
+      const end = new Date(start.getTime() + workSeconds * 1000);
+      workSeconds = (end.getTime() - now.getTime()) / 1000;
+    }
     set(workSeconds);
     let lastTick = Date.now();
     interval = setInterval(() => {
