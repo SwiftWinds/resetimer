@@ -12,7 +12,7 @@ import {
   requestPermission,
   sendNotification,
 } from "@tauri-apps/api/notification";
-import breakOverAudio from "$lib/assets/break-over.mp3";
+import breakOverMp3 from "$lib/assets/break-over.mp3";
 import { formatTime } from "$lib/utils/time";
 import { persisted } from "svelte-local-storage-store";
 import { cleanUrl } from "$lib/utils/url";
@@ -38,7 +38,7 @@ export function createBreakTimer() {
         body: "Aww... Boohoo! Time to get back to work! 😭",
         icon: "https://cdn-icons-png.flaticon.com/512/60/60802.png",
       });
-      new Audio(breakOverAudio).play();
+      new Audio(breakOverMp3).play();
     }
   }
 
@@ -53,6 +53,7 @@ export function createBreakTimer() {
     interval = setInterval(() => {
       // console.log("tick", dt, get(isWorking));
       if (get(isWorking)) {
+        lastTick = Date.now();
         return;
       }
       update((n) => {
