@@ -46,12 +46,14 @@ export function createBreakTimer() {
     if (!hasReset) {
       originalSeconds = breakSeconds;
       hasReset = true;
+      resets.set(0);
+    } else {
+      resets.update((n) => n + 1);
     }
     set(breakSeconds + get(breakTimer));
     let lastBreakNotification: number;
     let lastTick = Date.now();
     interval = setInterval(() => {
-      // console.log("tick", dt, get(isWorking));
       if (get(isWorking)) {
         lastTick = Date.now();
         return;
@@ -114,10 +116,10 @@ export function createWorkTimer() {
 
     if (permissionGranted) {
       sendNotification({
-        title: `Break tank refilled! 😌`,
+        title: `You've focused for ${formatTime(get(elapsedSeconds))}! 🎉`,
         body: `You now have up to ${formatTime(
           get(breakTimer)
-        )} minutes of break time! 🤩`,
+        )} of break time! 🤩`,
       });
     }
   }
@@ -144,6 +146,7 @@ export function createWorkTimer() {
       const end = new Date(start.getTime() + workSeconds * 1000);
       workSeconds = (end.getTime() - now.getTime()) / 1000;
     }
+    totalTime.set(workSeconds);
     set(workSeconds);
     let lastTick = Date.now();
     interval = setInterval(() => {
@@ -182,6 +185,8 @@ export function createWorkTimer() {
   };
 }
 export const workTimer = createWorkTimer();
+
+export const totalTime = writable(0);
 
 export const isWorking = derived(
   [
@@ -226,5 +231,14 @@ export const isWorking = derived(
   }
 );
 
+export const resets = writable(0);
+
 export const breakMinutes = persisted("breakMinutes", 5);
 export const workMinutes = persisted("workMinutes", 30);
+
+export const elapsedSeconds = derived(
+  [resets, workMinutes, totalTime, workTimer],
+  ([$resets, $workMinutes, $totalTime, $workTimer]) => {
+    return $resets * $workMinutes * 60 + ($totalTime - $workTimer);
+  }
+);
