@@ -13,7 +13,7 @@ import {
   sendNotification,
 } from "@tauri-apps/api/notification";
 import breakOverMp3 from "$lib/assets/break-over.mp3";
-import { formatTime } from "$lib/utils/time";
+import { formatTime, roundToNearestMinute } from "$lib/utils/time";
 import { persisted } from "svelte-local-storage-store";
 import { cleanUrl } from "$lib/utils/url";
 
@@ -116,7 +116,9 @@ export function createWorkTimer() {
 
     if (permissionGranted) {
       sendNotification({
-        title: `You've focused for ${formatTime(get(elapsedSeconds))}! 🎉`,
+        title: `You've focused for ${formatTime(
+          roundToNearestMinute(get(elapsedSeconds))
+        )}! 🎉`,
         body: `You now have up to ${formatTime(
           get(breakTimer)
         )} of break time! 🤩`,
