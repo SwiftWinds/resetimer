@@ -139,10 +139,8 @@ export function createWorkTimer() {
         nextStep = new Date(currentStep.getTime() + workSeconds * 1000);
       }
       const start = [nextStep, currentStep].sort(function (a, b) {
-        // @ts-ignore
-        var distanceA = Math.abs(now - a);
-        // @ts-ignore
-        var distanceB = Math.abs(now - b);
+        const distanceA = Math.abs(now.getTime() - a.getTime());
+        const distanceB = Math.abs(now.getTime() - b.getTime());
         return distanceA - distanceB; // sort a before b when the distance is smaller
       })[0];
       const end = new Date(start.getTime() + workSeconds * 1000);
@@ -215,21 +213,10 @@ export const isWorking = derived(
       );
     });
 
-    if ($isUsingAppWhitelist && $isUsingUrlWhitelist) {
-      return isUsingSelectedApp && isUsingSelectedUrl;
-    }
-
-    if ($isUsingAppWhitelist && !$isUsingUrlWhitelist) {
-      return isUsingSelectedApp && !isUsingSelectedUrl;
-    }
-
-    if (!$isUsingAppWhitelist && $isUsingUrlWhitelist) {
-      return !isUsingSelectedApp && isUsingSelectedUrl;
-    }
-
-    if (!$isUsingAppWhitelist && !$isUsingUrlWhitelist) {
-      return !isUsingSelectedApp && !isUsingSelectedUrl;
-    }
+    return (
+      $isUsingAppWhitelist === isUsingSelectedApp &&
+      $isUsingUrlWhitelist === isUsingSelectedUrl
+    );
   }
 );
 
