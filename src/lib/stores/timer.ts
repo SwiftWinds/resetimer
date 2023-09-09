@@ -26,10 +26,9 @@ export function createBreakTimer() {
 
   async function sendBreakOverNotification() {
     let permissionGranted = await isPermissionGranted();
-    if (!isPermissionGranted()) {
+    if (!isPermissionGranted) {
       const permission = await requestPermission();
       permissionGranted = permission === "granted";
-      requestPermission();
     }
 
     if (permissionGranted) {
@@ -53,7 +52,7 @@ export function createBreakTimer() {
     set(breakSeconds + get(breakTimer));
     let lastBreakNotification: number;
     let lastTick = Date.now();
-    interval = setInterval(() => {
+    interval = setInterval(function tickBreakTimer() {
       if (get(isWorking)) {
         lastTick = Date.now();
         return;
@@ -91,7 +90,8 @@ export function createBreakTimer() {
     subscribe,
     start,
     cancel,
-    reset: () => {
+    pause: stop,
+    reset() {
       stop();
       start(originalSeconds);
     },
@@ -108,10 +108,9 @@ export function createWorkTimer() {
 
   async function sendResetNotification() {
     let permissionGranted = await isPermissionGranted();
-    if (!isPermissionGranted()) {
+    if (!isPermissionGranted) {
       const permission = await requestPermission();
       permissionGranted = permission === "granted";
-      requestPermission();
     }
 
     if (permissionGranted) {
@@ -149,7 +148,7 @@ export function createWorkTimer() {
     totalTime.set(workSeconds);
     set(workSeconds);
     let lastTick = Date.now();
-    interval = setInterval(() => {
+    interval = setInterval(function tickWorkTimer() {
       update((n) => {
         if (n <= 0) {
           breakTimer.reset();
@@ -178,7 +177,8 @@ export function createWorkTimer() {
     subscribe,
     start,
     cancel,
-    reset: () => {
+    pause: stop,
+    reset() {
       stop();
       start(originalSeconds);
     },

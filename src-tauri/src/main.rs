@@ -15,7 +15,7 @@ use active_win_pos_rs::get_active_window;
 fn get_frontmost_window() -> String {
     match get_active_window() {
         Ok(active_window) => {
-            format!("{{\"title\": \"{}\", \"process_name\": \"{}\", \"process_id\": \"{}\", \"window_id\": \"{}\"}}", active_window.title, active_window.process_name, active_window.process_id, active_window.window_id)
+            format!("{{\"title\": \"{}\", \"process_name\": \"{}\", \"process_id\": \"{}\", \"window_id\": \"{}\"}}", active_window.title, active_window.app_name, active_window.process_id, active_window.window_id)
         }
         Err(()) => {
             format!("{{\"error\": \"{}\"}}", "Error getting active window")

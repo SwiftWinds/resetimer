@@ -10,6 +10,11 @@
 
     goto("/");
   }
+
+  function pauseTimer() {
+    breakTimer.pause();
+    workTimer.pause();
+  }
 </script>
 
 <h2 class="reset-title">
@@ -26,6 +31,7 @@
 
 <div>
   <button on:click={stopTimer}>Stop</button>
+  <button on:click={pauseTimer}>Pause</button>
 </div>
 
 <style>
